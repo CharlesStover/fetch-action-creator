@@ -1,0 +1,29 @@
+{
+  "name": "async-action",
+  "version": "0.1.0",
+  "description": "Creates standardized, three-part asynchronous actions for redux/thunk.",
+  "main": "async-action.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CharlesStover/async-action.git"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "thunk",
+    "async",
+    "asynchronous"
+  ],
+  "author": "Charles Stover",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CharlesStover/async-action/issues"
+  },
+  "homepage": "https://github.com/CharlesStover/async-action#readme",
+  "dependencies": {
+    "whatwg-fetch": "^2.0.3"
+  }
+}
