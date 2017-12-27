@@ -3,15 +3,15 @@
 type ActionCreator<T> = (param: T) => Object;
 type AsyncAction = (dispatch: Dispatch, getState: ObjectCreator) => Promise<void>;
 interface AsyncActionCreator {
-	default?: AsyncActionCreator;
-	(
-		url: string,
-		body: Object | ObjectCreator,
-		onRequest: null | ObjectCreator,
-		onReceive: ActionCreator<string> | null,
-		onError: ActionCreator<Error> | null,
-		cont: Continue | null
-	): AsyncAction;
+  default?: AsyncActionCreator;
+  (
+    url: string,
+    body: Object | ObjectCreator,
+    onRequest: null | ObjectCreator,
+    onReceive: ActionCreator<string> | null,
+    onError: ActionCreator<Error> | null,
+    cont: Continue | null
+  ): AsyncAction;
 }
 type Continue = (state: Object) => boolean;
 type Dispatch = (action: Object) => any;
@@ -37,42 +37,42 @@ export const asyncActionCreator: AsyncActionCreator = (url, body = {}, onRequest
     // Error Handler
     const errorHandler = (error: Error) => {
       if (onError) {
-				if (!error.message) {
-					error.message = 'Script error';
-				}
+        if (!error.message) {
+          error.message = 'Script error';
+        }
         dispatch(onError(error));
       }
     }
 
     // Fetch
     return (
-			fetch(url, typeof body === 'function' ? body() : body)
+      fetch(url, typeof body === 'function' ? body() : body)
       .then(
         (response: Response) => {
-					response
-					.text()
-					.then(
-						(res2: string) => {
-							if (
-								response.status >= 400 &&
-								response.status < 600
-							) {
-								try {
-									throw JSON.parse(res2);
-								}
-								catch (e) {
-									throw new Error(res2);
-								}
-							}
-							if (onReceive) {
-								dispatch(onReceive(res2));
-							}
-						}
-					)
-					.catch(errorHandler);
+          response
+          .text()
+          .then(
+            (res2: string) => {
+              if (
+                response.status >= 400 &&
+                response.status < 600
+              ) {
+                try {
+                  throw JSON.parse(res2);
+                }
+                catch (e) {
+                  throw new Error(res2);
+                }
+              }
+              if (onReceive) {
+                dispatch(onReceive(res2));
+              }
+            }
+          )
+          .catch(errorHandler);
         }
-			)
-			.catch(errorHandler)
+      )
+      .catch(errorHandler)
     );
   };
 };
