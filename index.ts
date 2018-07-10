@@ -45,7 +45,7 @@ const parseJsonOrText = (res: Response): Promise<Object | string> => {
   }
 };
 
-export const asyncActionCreator: ThunkActionCreator = (
+const thunkActionCreator: ThunkActionCreator = (
   url: string,
   body: Body = {},
   createRequestAction: OptionalRequestActionCreator = null,
@@ -143,4 +143,6 @@ export const asyncActionCreator: ThunkActionCreator = (
     );
   };
 
-asyncActionCreator.default = asyncActionCreator;
+thunkActionCreator.default = thunkActionCreator;
+
+module.exports = thunkActionCreator;

@@ -9,7 +9,7 @@ const parseJsonOrText = (res) => {
         return res.text();
     }
 };
-export const asyncActionCreator = (url, body = {}, createRequestAction = null, createReceiveAction = null, createErrorAction = null, createAbortAction = null, conditional = null) => (dispatch, getState) => {
+const thunkActionCreator = (url, body = {}, createRequestAction = null, createReceiveAction = null, createErrorAction = null, createAbortAction = null, conditional = null) => (dispatch, getState) => {
     // If we have a condition for fetching, check if we should continue.
     if (conditional &&
         !conditional(getState())) {
@@ -68,4 +68,5 @@ export const asyncActionCreator = (url, body = {}, createRequestAction = null, c
     })
         .catch(errorHandler));
 };
-asyncActionCreator.default = asyncActionCreator;
+thunkActionCreator.default = thunkActionCreator;
+module.exports = thunkActionCreator;
