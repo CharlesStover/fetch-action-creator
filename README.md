@@ -1,3 +1,9 @@
+![GitHub version](https://img.shields.io/github/package-json/v/CharlesStover/thunk-action-creator.svg)
+![npm version](https://img.shields.io/npm/v/thunk-action-creator.svg)
+![npm downloads](https://img.shields.io/npm/dt/thunk-action-creator.svg)
+![min](https://img.shields.io/bundlephobia/min/thunk-action-creator.svg)
+![minzip](https://img.shields.io/bundlephobia/minzip/thunk-action-creator.svg)
+
 # thunk-action-creator
 Creates standardized, four-part asynchronous actions for redux-thunk.
 
