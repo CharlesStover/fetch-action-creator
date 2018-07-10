@@ -33,19 +33,23 @@ const thunkAction = thunkActionCreator(
 
     If the user's browser does not support aborting requests, the value will be `null`.
 
-* ### createReceiveAction: (content: Object | string, headers: Headers) => AnyAction
+* ### createReceiveAction: (content: Object | string, statusCode: number, headers: Headers) => AnyAction
   An action creator that is called when your fetch request has received a response.
   #### Parameters
   * ##### content: Object | string
     A JavaScript object or string with which the server responded to the request.
+  * ##### statusCode: number
+    The status code with which the server responded to the request.
   * ##### headers: Headers
     An instance of `Headers` that contains the headers with which the server responded to the request.
 
-* ### createErrorAction: (error: string) => AnyAction
+* ### createErrorAction: (error: string, statusCode: null | number) => AnyAction
   An action creator that is called when an error occurs.
   #### Parameters
   * ##### error: string
     A string containing the error message. This may be either a JavaScript error or the response from the server.
+  * ##### statusCode: null | number
+    The status code with which the server responded to the request. If no status code exists (such as during a JavaScript error), the value is `null`.
 
 * ### createAbortAction: () => AnyAction
   An action creator that is called when the fetch request is aborted.

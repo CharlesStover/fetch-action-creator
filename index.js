@@ -35,7 +35,9 @@ const thunkActionCreator = (url, body = {}, createRequestAction = null, createRe
                 e :
                 e.message ?
                     e.message :
-                    'Script error'));
+                    'Script error', e.statusCode ?
+                e.statusCode :
+                null));
         }
         // Log the error to the console.
         if (typeof e === 'object' &&
@@ -55,13 +57,15 @@ const thunkActionCreator = (url, body = {}, createRequestAction = null, createRe
             // Check for an error status code.
             if (response.status >= 400 &&
                 response.status < 600) {
-                throw new Error(typeof content === 'string' ?
+                const e = new Error(typeof content === 'string' ?
                     content :
                     JSON.stringify(content));
+                e.statusCode = response.status;
+                throw e;
             }
             // Dispatch that we have received this request.
             if (createReceiveAction) {
-                dispatch(createReceiveAction(content, response.headers));
+                dispatch(createReceiveAction(content, response.status, response.headers));
             }
         })
             .catch(errorHandler);

@@ -7,7 +7,7 @@ export interface ThunkActionCreator {
     url: string,
     body: Body,
     createRequestAction: OptionalRequestActionCreator,
-    createReceiveAction: OptionalActionCreator,
+    createReceiveAction: OptionalReceiveActionCreator,
     createErrorAction: OptionaErrorActionCreator,
     createAbortAction: OptionalActionCreator,
     conditional: OptionalConditional
@@ -16,11 +16,20 @@ export interface ThunkActionCreator {
 
 export type Conditional = (state: any) => boolean;
 
-export type ErrorActionCreator = (error?: string) => AnyAction;
+export type ErrorActionCreator = (error?: string, statusCode?: null | number) => AnyAction;
 
-export type ReceiveActionCreator = (content?: Object | string, headers?: Headers) => AnyAction;
+export type ReceiveActionCreator = (content?: Object | string, statusCode?: number, headers?: Headers) => AnyAction;
+
+export interface ReceiveMetadata {
+  headers: Headers;
+  statusCode: number;
+}
 
 export type RequestActionCreator = (abortController?: AbortController | null) => AnyAction;
+
+interface FetchError extends Error {
+  statusCode?: number;
+}
 
 type AsyncAction = ThunkAction<Promise<void>, any, void, AnyAction>;
 type AsyncDispatch = ThunkDispatch<any, void, AnyAction>;
@@ -79,7 +88,7 @@ const thunkActionCreator: ThunkActionCreator = (
     }
 
     // Error Handler
-    const errorHandler = (e: Error) => {
+    const errorHandler = (e: FetchError) => {
 
       // If there is an action for this error, dispatch it.
       if (createErrorAction) {
@@ -88,7 +97,10 @@ const thunkActionCreator: ThunkActionCreator = (
             e :
             e.message ?
               e.message :
-              'Script error'
+              'Script error',
+          e.statusCode ?
+            e.statusCode :
+            null
         ));
       }
   
@@ -123,16 +135,18 @@ const thunkActionCreator: ThunkActionCreator = (
                     response.status >= 400 &&
                     response.status < 600
                   ) {
-                    throw new Error(
+                    const e: FetchError = new Error(
                       typeof content === 'string' ?
                         content :
                         JSON.stringify(content)
                     );
+                    e.statusCode = response.status;
+                    throw e;
                   }
 
                   // Dispatch that we have received this request.
                   if (createReceiveAction) {
-                    dispatch(createReceiveAction(content, response.headers));
+                    dispatch(createReceiveAction(content, response.status, response.headers));
                   }
                 }
               )

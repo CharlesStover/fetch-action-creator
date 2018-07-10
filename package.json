@@ -1,6 +1,6 @@
 {
   "name": "thunk-action-creator",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Creates standardized, four-part asynchronous actions for redux-thunk.",
   "main": "index.js",
   "repository": {
