@@ -1,29 +1,31 @@
 {
-  "name": "async-action",
+  "name": "redux-thunk-action",
   "version": "0.1.0",
-  "description": "Creates standardized, three-part asynchronous actions for redux/thunk.",
-  "main": "async-action.js",
-  "scripts": {
-    "test": "test"
-  },
+  "description": "Creates standardized, four-part asynchronous actions for redux-thunk.",
+  "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CharlesStover/async-action.git"
+    "url": "git+https://github.com/CharlesStover/redux-thunk-action.git"
   },
   "keywords": [
+    "async",
+    "asynchronous",
     "react",
     "redux",
-    "thunk",
-    "async",
-    "asynchronous"
+    "redux-thunk",
+    "thunk"
   ],
   "author": "Charles Stover",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/CharlesStover/async-action/issues"
+    "url": "https://github.com/CharlesStover/redux-thunk-action/issues"
   },
-  "homepage": "https://github.com/CharlesStover/async-action#readme",
+  "homepage": "https://github.com/CharlesStover/redux-thunk-action#readme",
   "dependencies": {
-    "whatwg-fetch": "^2.0.3"
+    "abortcontroller-polyfill": "^1.1.9",
+    "whatwg-fetch": "^2.0.4"
+  },
+  "devDependencies": {
+    "redux-thunk": "^2.3.0"
   }
 }

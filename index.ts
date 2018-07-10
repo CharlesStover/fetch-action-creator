@@ -1,6 +1,6 @@
-'use strict';
+import { ActionCreator } from 'redux';
+import 'whatwg-fetch';
 
-type ActionCreator<T> = (param: T) => Object;
 type AsyncAction = (dispatch: Dispatch, getState: ObjectCreator) => Promise<void>;
 interface AsyncActionCreator {
   default?: AsyncActionCreator;
@@ -16,8 +16,6 @@ interface AsyncActionCreator {
 type Continue = (state: Object) => boolean;
 type Dispatch = (action: Object) => any;
 type ObjectCreator = () => Object;
-
-import 'whatwg-fetch';
 
 export const asyncActionCreator: AsyncActionCreator = (url, body = {}, onRequest = null, onReceive = null, onError = null, cont = null) => {
   return (dispatch, getState) => {
