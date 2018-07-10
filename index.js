@@ -1,56 +1,71 @@
-'use strict';
-
-require('whatwg-fetch');
-
-var asyncActionCreator = function(url) {
-  var body = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var onRequest = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-  var onReceive = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-  var onError = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
-  var cont = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
-
-  return function (dispatch, getState) {
-
-    // If we have a condition for fetching, check if we should continue.
-    if (cont) {
-      if (!cont(getState())) {
-        return Promise.resolve();
-      }
+const MIN_ERROR_STATUS = 400;
+const MAX_ERROR_STATUS = 600;
+const parseJsonOrText = (res) => {
+    const res2 = res.clone();
+    try {
+        return res2.json();
     }
-
-    // Action: Requesting data.
-    if (onRequest) {
-      dispatch(onRequest());
+    catch (e) {
+        return res.text();
     }
-
-    // Error Handler
-    var errorHandler = function errorHandler(error) {
-      if (onError) {
-        if (!error.message) {
-          error.message = 'Script error';
-        }
-        dispatch(onError(error));
-      }
-    };
-
-    // Fetch
-    return fetch(url, typeof body === 'function' ? body() : body).then(function (response) {
-      response.text().then(function (res2) {
-        if (response.status >= 400 && response.status < 600) {
-          try {
-            throw JSON.parse(res2);
-          } catch (e) {
-            throw new Error(res2);
-          }
-        }
-        if (onReceive) {
-          dispatch(onReceive(res2));
-        }
-      }).catch(errorHandler);
-    }).catch(errorHandler);
-  };
 };
-
+export const asyncActionCreator = (url, body = {}, createRequestAction = null, createReceiveAction = null, createErrorAction = null, createAbortAction = null, conditional = null) => (dispatch, getState) => {
+    // If we have a condition for fetching, check if we should continue.
+    if (conditional &&
+        !conditional(getState())) {
+        return Promise.resolve();
+    }
+    // Implement AbortController, where possible.
+    let abortController = null;
+    let signal = null;
+    if (typeof AbortController !== 'undefined') {
+        abortController = new AbortController();
+        signal = abortController.signal;
+        if (createAbortAction) {
+            signal.addEventListener('abort', () => {
+                dispatch(createAbortAction());
+            });
+        }
+    }
+    // Error Handler
+    const errorHandler = (e) => {
+        // If there is an action for this error, dispatch it.
+        if (createErrorAction) {
+            dispatch(createErrorAction(typeof e === 'string' ?
+                e :
+                e.message ?
+                    e.message :
+                    'Script error'));
+        }
+        // Log the error to the console.
+        if (typeof e === 'object' &&
+            Object.prototype.hasOwnProperty.call(e, 'stack')) {
+            console.error(e.stack);
+        }
+    };
+    // Action: Requesting data.
+    if (createRequestAction) {
+        dispatch(createRequestAction(abortController));
+    }
+    // Fetch
+    return (fetch(url, Object.assign({ signal }, typeof body === 'function' ? body() : body))
+        .then((response) => {
+        parseJsonOrText(response)
+            .then((content) => {
+            // Check for an error status code.
+            if (response.status >= 400 &&
+                response.status < 600) {
+                throw new Error(typeof content === 'string' ?
+                    content :
+                    JSON.stringify(content));
+            }
+            // Dispatch that we have received this request.
+            if (createReceiveAction) {
+                dispatch(createReceiveAction(content, response.headers));
+            }
+        })
+            .catch(errorHandler);
+    })
+        .catch(errorHandler));
+};
 asyncActionCreator.default = asyncActionCreator;
-
-module.exports = asyncActionCreator;
