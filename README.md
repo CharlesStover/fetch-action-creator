@@ -1,18 +1,86 @@
 # thunk-action-creator
 Creates standardized, four-part asynchronous actions for redux-thunk.
 
+Dispatch a single, asynchronous action for fetching a request, and your redux store will receive corresponding actions when the request (1) dispatches, (2) receives a response, (3) encounters an error, and/or (4) is aborted.
+
+## Install
+`npm install thunk-action-creator --save` or `yarn add thunk-action-creator`
+
+Your redux store must be using the `thunk` middleware.
+
 ## Use
 ```JS
 import thunkActionCreator from 'thunk-action-creator';
-const thunkAction = thunkActionCreator(
-  url,
-  body,
-  createRequestAction,
-  createReceiveAction,
-  createErrorAction,
-  createAbortAction,
-  conditional
-);
+const myFetchAction = () =>
+  thunkActionCreator(
+    url,
+    requestInit,
+    createRequestAction,
+    createReceiveAction,
+    createErrorAction,
+    createAbortAction,
+    conditional
+  );
+
+dispatch(myFetchAction()) // fetches url, dispatching asynchronous actions
+```
+
+## Example
+```JS
+import thunkActionCreator from 'thunk-action-creator';
+const fetchEmployees = () =>
+  thunkActionCreator(
+
+    // URL to request.
+    'https://my.business.com/employees.json',
+
+    // Fetch options.
+    {
+      body: 'please',
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8'
+      },
+      method: 'GET'
+    },
+
+    // Action for when the request has dispatched.
+    (abortController) => ({
+      type: 'REQUEST_EMPLOYEES',
+      abortController
+    }),
+
+    // Action for when the server has responded.
+    (employees) => ({
+      type: 'RECEIVE_EMPLOYEES',
+      employees
+    }),
+
+    // Action for when an error has occurred.
+    (err, statusCode) => ({
+      type: 'EMPLOYEES_ERROR',
+      error: err,
+      statusCode
+    }),
+
+    // Action for when the request has been aborted.
+    () => ({
+      type: 'ABORT_EMPLOYEES'
+    }),
+
+    // Conditional function for when to disregard this action entirely.
+    (state) => {
+
+      // Don't fetch twice.
+      if (
+        state.employees.isFetching ||
+        Array.isArray(state.employees.list)
+      ) {
+        return false;
+      }
+
+      return true;
+    }
+  );
 ```
 
 ## Parameters
@@ -20,8 +88,8 @@ const thunkAction = thunkActionCreator(
 * ### url: string
   The URL to which you are dispatching a fetch request.
 
-* ### body: any
-  The contents which you are including in your fetch request _or_ a function that returns said contents.
+* ### requestInit: any
+  The fetch options which you are including in your fetch request _or_ a function that returns said options.
 
 * ### createRequestAction: (abortController: AbortController | null) => AnyAction
   An action creator that is called when your fetch request has been dispatched.

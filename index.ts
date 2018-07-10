@@ -5,7 +5,7 @@ export interface ThunkActionCreator {
   default?: ThunkActionCreator;
   (
     url: string,
-    body: Body,
+    requestInit: Init,
     createRequestAction: OptionalRequestActionCreator,
     createReceiveAction: OptionalReceiveActionCreator,
     createErrorAction: OptionaErrorActionCreator,
@@ -34,6 +34,7 @@ interface FetchError extends Error {
 type AsyncAction = ThunkAction<Promise<void>, any, void, AnyAction>;
 type AsyncDispatch = ThunkDispatch<any, void, AnyAction>;
 type Body = any | (() => any);
+type Init = RequestInit | (() => RequestInit);
 type OptionalActionCreator = ActionCreator<AnyAction> | null;
 type OptionalConditional = Conditional | null;
 type OptionaErrorActionCreator = ErrorActionCreator | null;
@@ -56,7 +57,7 @@ const parseJsonOrText = (res: Response): Promise<Object | string> => {
 
 const thunkActionCreator: ThunkActionCreator = (
   url: string,
-  body: Body = {},
+  requestInit: Init = {},
   createRequestAction: OptionalRequestActionCreator = null,
   createReceiveAction: OptionalReceiveActionCreator = null,
   createErrorAction: OptionalActionCreator = null,
@@ -122,7 +123,7 @@ const thunkActionCreator: ThunkActionCreator = (
     return (
       fetch(url, {
         signal,
-        ...typeof body === 'function' ? body() : body
+        ...typeof requestInit === 'function' ? requestInit() : requestInit
       })
         .then(
           (response: Response): void => {

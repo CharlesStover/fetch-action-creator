@@ -9,7 +9,7 @@ const parseJsonOrText = (res) => {
         return res.text();
     }
 };
-const thunkActionCreator = (url, body = {}, createRequestAction = null, createReceiveAction = null, createErrorAction = null, createAbortAction = null, conditional = null) => (dispatch, getState) => {
+const thunkActionCreator = (url, requestInit = {}, createRequestAction = null, createReceiveAction = null, createErrorAction = null, createAbortAction = null, conditional = null) => (dispatch, getState) => {
     // If we have a condition for fetching, check if we should continue.
     if (conditional &&
         !conditional(getState())) {
@@ -50,7 +50,7 @@ const thunkActionCreator = (url, body = {}, createRequestAction = null, createRe
         dispatch(createRequestAction(abortController));
     }
     // Fetch
-    return (fetch(url, Object.assign({ signal }, typeof body === 'function' ? body() : body))
+    return (fetch(url, Object.assign({ signal }, typeof requestInit === 'function' ? requestInit() : requestInit))
         .then((response) => {
         parseJsonOrText(response)
             .then((content) => {
