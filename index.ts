@@ -14,6 +14,8 @@ export interface ThunkActionCreator {
   ): AsyncAction;
 }
 
+export type Conditional = (state: any) => boolean;
+
 export type ErrorActionCreator = (error?: string) => AnyAction;
 
 export type ReceiveActionCreator = (content?: Object | string, headers?: Headers) => AnyAction;
@@ -23,7 +25,6 @@ export type RequestActionCreator = (abortController?: AbortController | null) =>
 type AsyncAction = ThunkAction<Promise<void>, any, void, AnyAction>;
 type AsyncDispatch = ThunkDispatch<any, void, AnyAction>;
 type Body = any | (() => any);
-type Conditional = (state: any) => boolean;
 type OptionalActionCreator = ActionCreator<AnyAction> | null;
 type OptionalConditional = Conditional | null;
 type OptionaErrorActionCreator = ErrorActionCreator | null;
