@@ -1,25 +1,25 @@
-# thunk-action-creator
-Creates standardized, four-part asynchronous actions for redux-thunk.
+# fetch-action-creator
+Fetches using standardized, four-part asynchronous actions for redux-thunk.
 
-Dispatch a single, asynchronous action for fetching a request, and your redux store will receive corresponding actions when the request (1) dispatches, (2) receives a response, (3) encounters an error, and/or (4) is aborted.
+Dispatch a single, asynchronous action that fetches a request, and your redux store will receive corresponding actions when the request (1) dispatches, (2) receives a response, (3) encounters an error, and/or (4) is aborted.
 
-![GitHub version](https://img.shields.io/github/package-json/v/CharlesStover/thunk-action-creator.svg)
-![npm version](https://img.shields.io/npm/v/thunk-action-creator.svg)
-![npm downloads](https://img.shields.io/npm/dt/thunk-action-creator.svg)
-![min](https://img.shields.io/bundlephobia/min/thunk-action-creator.svg)
-![minzip](https://img.shields.io/bundlephobia/minzip/thunk-action-creator.svg)
+![GitHub version](https://img.shields.io/github/package-json/v/CharlesStover/fetch-action-creator.svg)
+![npm version](https://img.shields.io/npm/v/fetch-action-creator.svg)
+![npm downloads](https://img.shields.io/npm/dt/fetch-action-creator.svg)
+![min](https://img.shields.io/bundlephobia/min/fetch-action-creator.svg)
+![minzip](https://img.shields.io/bundlephobia/minzip/fetch-action-creator.svg)
 
 ## Install
-* `npm install thunk-action-creator --save` or
-* `yarn add thunk-action-creator`
+* `npm install fetch-action-creator --save` or
+* `yarn add fetch-action-creator`
 
 Your redux store must be using the `thunk` middleware.
 
 ## Use
 ```JS
-import thunkActionCreator from 'thunk-action-creator';
+import fetchActionCreator from 'fetch-action-creator';
 const myFetchAction = () =>
-  thunkActionCreator(
+  fetchActionCreator(
     url,
     requestInit,
     createRequestAction,
@@ -34,9 +34,9 @@ dispatch(myFetchAction()) // fetches url, dispatching asynchronous actions
 
 ## Example
 ```JS
-import thunkActionCreator from 'thunk-action-creator';
+import fetchActionCreator from 'fetch-action-creator';
 const fetchEmployees = () =>
-  thunkActionCreator(
+  fetchActionCreator(
 
     // URL to request.
     'https://my.business.com/employees.json',

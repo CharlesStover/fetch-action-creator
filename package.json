@@ -1,12 +1,20 @@
 {
-  "name": "thunk-action-creator",
-  "version": "0.1.2",
-  "description": "Creates standardized, four-part asynchronous actions for redux-thunk.",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CharlesStover/thunk-action-creator.git"
+  "name": "fetch-action-creator",
+  "version": "1.0.1",
+  "author": "Charles Stover",
+  "bugs": {
+    "url": "https://github.com/CharlesStover/fetch-action-creator/issues"
   },
+  "description": "Fetches using standardized, four-part asynchronous actions for redux-thunk.",
+  "devDependencies": {
+    "@types/node": "^10.5.2",
+    "@types/redux": "^3.6.0",
+    "@types/redux-thunk": "^2.1.0",
+    "redux": "^4.0.0",
+    "redux-thunk": "^2.3.0",
+    "typescript": "^2.9.2"
+  },
+  "homepage": "https://github.com/CharlesStover/fetch-action-creator#readme",
   "keywords": [
     "async",
     "asynchronous",
@@ -15,15 +23,15 @@
     "redux-thunk",
     "thunk"
   ],
-  "author": "Charles Stover",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/CharlesStover/thunk-action-creator/issues"
+  "main": "fetch-action-creator.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CharlesStover/fetch-action-creator.git"
   },
-  "homepage": "https://github.com/CharlesStover/thunk-action-creator#readme",
-  "devDependencies": {
-    "@types/node": "^10.5.2",
-    "redux": "^4.0.0",
-    "redux-thunk": "^2.3.0"
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "mocha './fetch-action-creator.spec.js'"
   }
 }

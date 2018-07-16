@@ -1,8 +1,8 @@
 import { ActionCreator, AnyAction } from 'redux';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 
-export interface ThunkActionCreator {
-  default?: ThunkActionCreator;
+export interface FetchActionCreator {
+  default?: FetchActionCreator;
   (
     url: string,
     requestInit: Init,
@@ -11,7 +11,7 @@ export interface ThunkActionCreator {
     createErrorAction: OptionaErrorActionCreator,
     createAbortAction: OptionalActionCreator,
     conditional: OptionalConditional
-  ): AsyncAction;
+  ): FetchAction;
 }
 
 export type Conditional = (state: any) => boolean;
@@ -31,9 +31,8 @@ interface FetchError extends Error {
   statusCode?: number;
 }
 
-type AsyncAction = ThunkAction<Promise<void>, any, void, AnyAction>;
-type AsyncDispatch = ThunkDispatch<any, void, AnyAction>;
-type Body = any | (() => any);
+type FetchAction = ThunkAction<Promise<void>, any, void, AnyAction>;
+type FetchDispatch = ThunkDispatch<any, void, AnyAction>;
 type Init = RequestInit | (() => RequestInit);
 type OptionalActionCreator = ActionCreator<AnyAction> | null;
 type OptionalConditional = Conditional | null;
@@ -55,7 +54,7 @@ const parseJsonOrText = (res: Response): Promise<Object | string> => {
   }
 };
 
-const thunkActionCreator: ThunkActionCreator = (
+const fetchActionCreator: FetchActionCreator = (
   url: string,
   requestInit: Init = {},
   createRequestAction: OptionalRequestActionCreator = null,
@@ -63,8 +62,8 @@ const thunkActionCreator: ThunkActionCreator = (
   createErrorAction: OptionalActionCreator = null,
   createAbortAction: OptionalActionCreator = null,
   conditional: OptionalConditional = null
-): AsyncAction =>
-  (dispatch: AsyncDispatch, getState: StateGetter): Promise<void> => {
+): FetchAction =>
+  (dispatch: FetchDispatch, getState: StateGetter): Promise<void> => {
 
     // If we have a condition for fetching, check if we should continue.
     if (
@@ -76,7 +75,7 @@ const thunkActionCreator: ThunkActionCreator = (
 
     // Implement AbortController, where possible.
     let abortController = null;
-    let signal = null;
+    let signal: AbortSignal | undefined = undefined;
     if (typeof AbortController !== 'undefined') {
       abortController = new AbortController();
       signal = abortController.signal;
@@ -133,8 +132,8 @@ const thunkActionCreator: ThunkActionCreator = (
 
                   // Check for an error status code.
                   if (
-                    response.status >= 400 &&
-                    response.status < 600
+                    response.status >= MIN_ERROR_STATUS &&
+                    response.status < MAX_ERROR_STATUS
                   ) {
                     const e: FetchError = new Error(
                       typeof content === 'string' ?
@@ -158,6 +157,6 @@ const thunkActionCreator: ThunkActionCreator = (
     );
   };
 
-thunkActionCreator.default = thunkActionCreator;
+fetchActionCreator.default = fetchActionCreator;
 
-module.exports = thunkActionCreator;
+module.exports = fetchActionCreator;
