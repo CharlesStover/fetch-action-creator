@@ -2,6 +2,7 @@
 /node_modules
 .gitignore
 .npmignore
+.travis.yml
 fetch-action-creator.ts
 package-lock.json
 tsconfig.json
