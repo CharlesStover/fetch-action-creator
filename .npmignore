@@ -3,6 +3,6 @@
 .gitignore
 .npmignore
 .travis.yml
+fetch-action-creator.spec.js
 fetch-action-creator.ts
-package-lock.json
 tsconfig.json

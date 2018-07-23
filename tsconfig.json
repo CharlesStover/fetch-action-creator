@@ -3,7 +3,7 @@
     "declaration": true,
     "downlevelIteration": true,
     "lib": [ "dom", "es5", "es2015.promise", "scripthost" ],
-    "module": "amd",
+    "module": "commonjs",
     "moduleResolution": "Node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -11,12 +11,12 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outFile": "fetch-action-creator.js",
+    "outDir": ".",
     "removeComments": true,
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "target": "es3"
+    "target": "es5"
   },
   "files": [ "fetch-action-creator.ts" ]
 }
