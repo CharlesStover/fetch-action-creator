@@ -105,12 +105,14 @@ const fetchActionCreator: FetchActionCreator = (
       }
   
       // Log the error to the console.
+      /*
       if (
         typeof e === 'object' &&
         Object.prototype.hasOwnProperty.call(e, 'stack')
       ) {
         console.error(e.stack);
       }
+      */
     };
 
     // Action: Requesting data.
