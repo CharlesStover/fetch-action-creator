@@ -3,11 +3,11 @@ Fetches using standardized, four-part asynchronous actions for redux-thunk.
 
 Dispatch a single, asynchronous action that fetches a request, and your redux store will receive corresponding actions when the request (1) dispatches, (2) receives a response, (3) encounters an error, and/or (4) is aborted.
 
-![package](https://img.shields.io/github/package-json/v/CharlesStover/fetch-action-creator.svg)
-![build](https://travis-ci.com/CharlesStover/fetch-action-creator.svg)
-![downloads](https://img.shields.io/npm/dt/fetch-action-creator.svg)
-![minified size](https://img.shields.io/bundlephobia/min/fetch-action-creator.svg)
-![minzipped size](https://img.shields.io/bundlephobia/minzip/fetch-action-creator.svg)
+[![package](https://img.shields.io/github/package-json/v/CharlesStover/fetch-action-creator.svg)](https://github.com/CharlesStover/fetch-action-creator/)
+[![build](https://travis-ci.com/CharlesStover/fetch-action-creator.svg)](https://travis-ci.com/CharlesStover/fetch-action-creator/)
+[![downloads](https://img.shields.io/npm/dt/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
+[![minified size](https://img.shields.io/bundlephobia/min/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
+[![minzipped size](https://img.shields.io/bundlephobia/minzip/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
 
 ## Install
 * `npm install fetch-action-creator --save` or
