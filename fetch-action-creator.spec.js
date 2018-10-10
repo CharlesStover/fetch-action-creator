@@ -13,22 +13,22 @@ Response.prototype.json = () => {
 };
 Response.prototype.text = () => Promise.resolve('response.text()');
 
-const createAbortAction = () => ({ type: 'ABORT' });
-const createErrorAction = () => ({ type: 'ERROR' });
-const createReceiveAction = () => ({ type: 'RECEIVE' });
-const createRequestAction = (controller) => ({ type: 'REQUEST', controller });
-const emptyDispatch = () => {};
+const fetchAsyncSuccess = () => new Promise(resolve => {
+  setTimeout(resolve, 1000);
+});
 const fetchError = () => Promise.reject(new Error('fetch error'));
 const fetchError2 = () => Promise.resolve(new Response(404));
 const fetchSuccess = () => Promise.resolve(new Response(200));
 const getEmptyState = () => Object.create(null);
+
+const ID = 'TEST';
 const INIT = { body: 'body' };
 const URL = 'http://localhost/';
 
 describe('fetchActionCreator', () => {
 
   it('should create a thunk action', () => {
-    const action = fetchActionCreator(URL, INIT);
+    const action = fetchActionCreator(ID, URL, INIT);
     expect(action).to.be.a('function');
     expect(action.length).to.equal(2);
   });
@@ -36,75 +36,83 @@ describe('fetchActionCreator', () => {
   // REQUEST
   it('should dispatch a request action', () => {
     global.fetch = fetchSuccess;
-    const action = fetchActionCreator(URL, INIT, createRequestAction);
+    const action = fetchActionCreator(ID, URL, INIT);
     let dispatchCalls = 0;
     const dispatch = ({ type }) => {
       dispatchCalls++;
-      expect(type).to.equal('REQUEST');
+      if (dispatchCalls === 1) {
+        expect(type).to.equal('REQUEST_' + ID);
+      }
     };
     return action(dispatch, getEmptyState).then(() => {
-      expect(dispatchCalls).to.equal(1);
+      expect(dispatchCalls).to.equal(2);
     });
   });
 
-  // RECEIVE
-  it('should dispatch a receive action', () => {
+  // RESOLVE
+  it('should dispatch a resolve action', () => {
     global.fetch = fetchSuccess;
-    const action = fetchActionCreator(URL, INIT, null, createReceiveAction);
+    const action = fetchActionCreator(ID, URL, INIT);
     let dispatchCalls = 0;
     const dispatch = ({ type }) => {
       dispatchCalls++;
-      expect(type).to.equal('RECEIVE');
+      if (dispatchCalls === 2) {
+        expect(type).to.equal('RESOLVE_' + ID);
+      }
     };
     return action(dispatch, getEmptyState).then(() => {
-      expect(dispatchCalls).to.equal(1);
+      expect(dispatchCalls).to.equal(2);
     });
   });
 
-  // ERROR (fetch)
-  it('should dispatch a fetch error action', () => {
+  // REJECT (fetch)
+  it('should dispatch a fetch reject action', () => {
     global.fetch = fetchError;
-    const action = fetchActionCreator(URL, INIT, null, null, createErrorAction);
+    const action = fetchActionCreator(ID, URL, INIT);
     let dispatchCalls = 0;
     const dispatch = ({ type }) => {
       dispatchCalls++;
-      expect(type).to.equal('ERROR');
+      if (dispatchCalls === 2) {
+        expect(type).to.equal('REJECT_' + ID);
+      }
     };
     return action(dispatch, getEmptyState).then(() => {
-      expect(dispatchCalls).to.equal(1);
+      expect(dispatchCalls).to.equal(2);
     });
   });
 
-  // ERROR (server)
-  it('should dispatch a server error action', () => {
+  // REJECT (server)
+  it('should dispatch a server reject action', () => {
     global.fetch = fetchError2;
-    const action = fetchActionCreator(URL, INIT, null, null, createErrorAction);
+    const action = fetchActionCreator(ID, URL, INIT);
     let dispatchCalls = 0;
     const dispatch = ({ type }) => {
       dispatchCalls++;
-      expect(type).to.equal('ERROR');
+      if (dispatchCalls === 2) {
+        expect(type).to.equal('REJECT_' + ID);
+      }
     };
     return action(dispatch, getEmptyState).then(() => {
-      expect(dispatchCalls).to.equal(1);
+      expect(dispatchCalls).to.equal(2);
     });
   });
 
   // ABORT
   it('should dispatch an abort action', () => {
-    global.fetch = fetchSuccess;
+    global.fetch = fetchAsyncSuccess;
     let resolve = () => {};
     const abortPromise = new Promise((r) => {
       resolve = r;
     });
-    const action = fetchActionCreator(URL, INIT, createRequestAction, null, null, createAbortAction);
+    const action = fetchActionCreator(ID, URL, INIT);
     let dispatchCalls = 0;
     const dispatch = (action) => {
       dispatchCalls++;
-      if (action.type === 'REQUEST') {
-        action.controller.abort();
+      if (action.type === 'REQUEST_' + ID) {
+        action.abortController.abort();
       }
-      else {
-        expect(action.type).to.equal('ABORT');
+      else if (action.type !== 'REJECT_' + ID) {
+        expect(action.type).to.equal('ABORT_' + ID);
         expect(dispatchCalls).to.equal(2);
         resolve();
       }
@@ -117,9 +125,7 @@ describe('fetchActionCreator', () => {
   it('should respect the conditional', () => {
     global.fetch = fetchSuccess;
     const action = fetchActionCreator(
-      URL, INIT,
-      createRequestAction, createReceiveAction,
-      createErrorAction, createAbortAction,
+      ID, URL, INIT, null,
       () => false
     );
     let dispatchCalls = 0;
@@ -128,6 +134,46 @@ describe('fetchActionCreator', () => {
     };
     return action(dispatch, getEmptyState).then(() => {
       expect(dispatchCalls).to.equal(0);
+    });
+  });
+
+  it('should allow object action mutation', () => {
+    global.fetch = fetchSuccess;
+    const action = fetchActionCreator(
+      ID, URL, INIT, {
+        onRequest: { test: 123 }
+      }
+    );
+    let dispatchCalls = 0;
+    const dispatch = action => {
+      dispatchCalls++;
+      if (dispatchCalls === 1) {
+        expect(action.test).to.equal(123);
+      }
+    };
+    return action(dispatch, getEmptyState).then(() => {
+      expect(dispatchCalls).to.equal(2);
+    });
+  });
+
+  it('should allow function action mutation', () => {
+    global.fetch = fetchSuccess;
+    const action = fetchActionCreator(
+      ID, URL, INIT, {
+        onRequest: requestAction => ({
+          type: 'NEW'
+        })
+      }
+    );
+    let dispatchCalls = 0;
+    const dispatch = action => {
+      dispatchCalls++;
+      if (dispatchCalls === 1) {
+        expect(action.type).to.equal('NEW');
+      }
+    };
+    return action(dispatch, getEmptyState).then(() => {
+      expect(dispatchCalls).to.equal(2);
     });
   });
 });

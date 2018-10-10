@@ -1,162 +1,215 @@
-import { ActionCreator, AnyAction } from 'redux';
+import { AnyAction } from 'redux';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
+
+export interface AbortAction {
+  type: string;
+}
+
+export type ActionMutator<A extends FetchStateAction> = (action: A) => AnyAction;
+
+export interface Actions {
+  onAbort?: ActionMutator<AbortAction> | Object;
+  onReject?: ActionMutator<RejectAction> | Object;
+  onRequest?: ActionMutator<RequestAction> | Object;
+  onResolve?: ActionMutator<ResolveAction> | Object;
+}
+
+interface Conditional {
+  (state: Object): boolean;
+}
+
+type FetchAction = ThunkAction<Promise<void>, any, void, AnyAction>;
 
 export interface FetchActionCreator {
   default?: FetchActionCreator;
   (
-    url: string,
-    requestInit: Init,
-    createRequestAction: OptionalRequestActionCreator,
-    createReceiveAction: OptionalReceiveActionCreator,
-    createErrorAction: OptionaErrorActionCreator,
-    createAbortAction: OptionalActionCreator,
-    conditional: OptionalConditional
+    id: string,
+    input: Request | string,
+    init: Init,
+    actions: Actions,
+    conditional?: Conditional
   ): FetchAction;
 }
 
-export type Conditional = (state: any) => boolean;
+type FetchStateAction = AbortAction | RejectAction | RequestAction | ResolveAction;
 
-export type ErrorActionCreator = (error?: string, statusCode?: null | number) => AnyAction;
+type Init = RequestInit | (() => RequestInit);
 
-export type ReceiveActionCreator = (content?: Object | string, statusCode?: number, headers?: Headers) => AnyAction;
+export interface RejectAction {
+  error: string;
+  headers: Headers | null,
+  statusCode: null | number;
+  type: string;
+}
 
-export interface ReceiveMetadata {
+export interface RequestAction {
+  abortController: AbortController | null;
+  type: string;
+}
+
+export interface ResolveAction {
+  body: Object | string;
   headers: Headers;
   statusCode: number;
+  type: string;
 }
 
-export type RequestActionCreator = (abortController?: AbortController | null) => AnyAction;
 
-interface FetchError extends Error {
-  statusCode?: number;
+
+class FetchError extends Error {
+  headers: Headers;
+  statusCode: number;
+
+  constructor(message: Object | string, headers: Headers, statusCode: number) {
+    super(
+      typeof message === 'string' ?
+        message :
+        JSON.stringify(message)
+    );
+    this.headers = headers;
+    this.statusCode = statusCode;
+  }
 }
 
-type FetchAction = ThunkAction<Promise<void>, any, void, AnyAction>;
-type FetchDispatch = ThunkDispatch<any, void, AnyAction>;
-type Init = RequestInit | (() => RequestInit);
-type OptionalActionCreator = ActionCreator<AnyAction> | null;
-type OptionalConditional = Conditional | null;
-type OptionaErrorActionCreator = ErrorActionCreator | null;
-type OptionalReceiveActionCreator = ReceiveActionCreator | null;
-type OptionalRequestActionCreator = RequestActionCreator | null;
-type StateGetter = () => any;
+const MIN_ERROR_STATUS_CODE: number = 400;
+const MAX_ERROR_STATUS_CODE: number = 600;
 
-const MIN_ERROR_STATUS: number = 400;
-const MAX_ERROR_STATUS: number = 600;
+const createAction = (action: FetchStateAction, actionMutator?: ActionMutator<FetchStateAction> | null | Object): AnyAction => {
+  if (!actionMutator) {
+    return action;
+  }
+  if (typeof actionMutator === 'object') {
+    return {
+      ...action,
+      ...actionMutator
+    };
+  }
+  return actionMutator(action);
+};
 
-const parseJsonOrText = (res: Response): Promise<Object | string> => {
-  const res2 = res.clone();
+const parseResponse = (response: Response): Promise<[ Object | string, Headers, number ]> => {
+  const includeMeta = <T = Object | string>(result: T): [ T, Headers, number ] => [ result, response.headers, response.status ];
+  const response2 = response.clone();
   try {
-    return res2.json();
+    return response2.json().then(includeMeta);
   }
   catch (e) {
-    return res.text();
+    return response.text().then(includeMeta);
   }
 };
 
 const fetchActionCreator: FetchActionCreator = (
-  url: string,
-  requestInit: Init = {},
-  createRequestAction: OptionalRequestActionCreator = null,
-  createReceiveAction: OptionalReceiveActionCreator = null,
-  createErrorAction: OptionalActionCreator = null,
-  createAbortAction: OptionalActionCreator = null,
-  conditional: OptionalConditional = null
+  id: string,
+  url: Request | string,
+  init: Init | null = Object.create(null),
+  actions: Actions | null = Object.create(null),
+  conditional?: Conditional
 ): FetchAction =>
-  (dispatch: FetchDispatch, getState: StateGetter): Promise<void> => {
+  (dispatch: ThunkDispatch<any, void, AnyAction>, getState: () => Object): Promise<void> => {
 
     // If we have a condition for fetching, check if we should continue.
     if (
-      conditional &&
+      typeof conditional === 'function' &&
       !conditional(getState())
     ) {
       return Promise.resolve();
     }
 
     // Implement AbortController, where possible.
-    let abortController = null;
-    let signal: AbortSignal | undefined = undefined;
+    let abortController: AbortController | null = null;
+    let signal: AbortSignal | null = null;
+
+    // If this browser supports AbortController, create one.
     if (typeof AbortController !== 'undefined') {
       abortController = new AbortController();
       signal = abortController.signal;
 
-      if (createAbortAction) {
-        signal.addEventListener('abort', () => {
-          dispatch(createAbortAction());
-        });
-      }
-    }
-
-    // Error Handler
-    const errorHandler = (e: FetchError) => {
-
-      // If there is an action for this error, dispatch it.
-      if (createErrorAction) {
-        dispatch(createErrorAction(
-          typeof e === 'string' ?
-            e :
-            e.message ?
-              e.message :
-              'Script error',
-          e.statusCode ?
-            e.statusCode :
+      // When the signal aborts, dispatch the abort action.
+      signal.addEventListener('abort', () => {
+        const abortAction: AbortAction = {
+          type: 'ABORT_' + id
+        };
+        dispatch(createAction(
+          abortAction,
+          actions !== null &&
+          Object.prototype.hasOwnProperty.call(actions, 'onAbort') ?
+            actions.onAbort :
             null
         ));
-      }
-  
-      // Log the error to the console.
-      /*
-      if (
-        typeof e === 'object' &&
-        Object.prototype.hasOwnProperty.call(e, 'stack')
-      ) {
-        console.error(e.stack);
-      }
-      */
-    };
-
-    // Action: Requesting data.
-    if (createRequestAction) {
-      dispatch(createRequestAction(abortController));
+      });
     }
 
+    // Dispatch the request action.
+    const requestAction: RequestAction = {
+      abortController,
+      type: 'REQUEST_' + id
+    };
+    dispatch(createAction(
+      requestAction,
+      actions !== null &&
+      Object.prototype.hasOwnProperty.call(actions, 'onRequest') ?
+        actions.onRequest :
+        null
+    ));
+
     // Fetch
-    return (
-      fetch(url, {
-        signal,
-        ...typeof requestInit === 'function' ? requestInit() : requestInit
+    const requestInit: null | RequestInit =
+      typeof init === 'function' ?
+        init() :
+        init;
+    return fetch(url, { signal, ...requestInit })
+      .then(parseResponse)
+      .then(([ body, headers, statusCode ]: [ Object | string, Headers, number ]) => {
+
+        // Check for an error status code.
+        if (
+          statusCode >= MIN_ERROR_STATUS_CODE &&
+          statusCode < MAX_ERROR_STATUS_CODE
+        ) {
+          throw new FetchError(body, headers, statusCode);
+        }
+
+        // Dispatch the resolve action.
+        const resolveAction: ResolveAction = {
+          body,
+          headers,
+          statusCode,
+          type: 'RESOLVE_' + id
+        };
+        dispatch(createAction(
+          resolveAction,
+          actions !== null &&
+          Object.prototype.hasOwnProperty.call(actions, 'onResolve') ?
+            actions.onResolve :
+            null
+        ));
       })
-        .then(
-          (response: Response): void => {
-            parseJsonOrText(response)
-              .then(
-                (content: Object | string): void => {
 
-                  // Check for an error status code.
-                  if (
-                    response.status >= MIN_ERROR_STATUS &&
-                    response.status < MAX_ERROR_STATUS
-                  ) {
-                    const e: FetchError = new Error(
-                      typeof content === 'string' ?
-                        content :
-                        JSON.stringify(content)
-                    );
-                    e.statusCode = response.status;
-                    throw e;
-                  }
-
-                  // Dispatch that we have received this request.
-                  if (createReceiveAction) {
-                    dispatch(createReceiveAction(content, response.status, response.headers));
-                  }
-                }
-              )
-              .catch(errorHandler);
-          }
-        )
-        .catch(errorHandler)
-    );
+      // Dispatch the reject action.
+      .catch((err: Error | FetchError) => {
+        const rejectAction: RejectAction = {
+          error:
+            Object.prototype.hasOwnProperty.call(err, 'message') ?
+              err.message :
+              'Script error',
+          headers:
+            err instanceof FetchError ?
+              err.headers :
+              null,
+          statusCode:
+            err instanceof FetchError ?
+              err.statusCode :
+              null,
+          type: 'REJECT_' + id
+        };
+        dispatch(createAction(
+          rejectAction,
+          actions !== null &&
+          Object.prototype.hasOwnProperty.call(actions, 'onReject') ?
+            actions.onReject :
+            null
+        ));
+      });
   };
 
 fetchActionCreator.default = fetchActionCreator;

@@ -1,8 +1,8 @@
-/.vscode
 /node_modules
 .gitignore
 .npmignore
 .travis.yml
 fetch-action-creator.spec.js
 fetch-action-creator.ts
+README-v1.md
 tsconfig.json

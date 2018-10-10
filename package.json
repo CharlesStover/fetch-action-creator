@@ -1,6 +1,6 @@
 {
   "name": "fetch-action-creator",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "author": "Charles Stover",
   "bugs": {
     "url": "https://github.com/CharlesStover/fetch-action-creator/issues"
@@ -11,20 +11,25 @@
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
     "abortcontroller-polyfill": "^1.1.9",
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "redux": "^4.0.0",
     "redux-thunk": "^2.3.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.1.2"
   },
   "homepage": "https://github.com/CharlesStover/fetch-action-creator#readme",
   "keywords": [
     "async",
     "asynchronous",
+    "fetch",
+    "fetch-api",
     "react",
+    "reactjs",
     "redux",
+    "reduxjs",
     "redux-thunk",
-    "thunk"
+    "thunk",
+    "state-management"
   ],
   "license": "MIT",
   "main": "fetch-action-creator.js",
