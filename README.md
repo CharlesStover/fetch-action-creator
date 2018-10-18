@@ -127,9 +127,9 @@ const fetchAddEmployee = name =>
   
   _See also:_ [fetch parameters](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) on MDN
 
-* ### init: null | RequestInit | () => RequestInit
+* ### init: null | RequestInit | (state?: Object) => RequestInit
 
-  The fetch options which you are including in your fetch request _or_ a function that returns said options.
+  The fetch options which you are including in your fetch request _or_ a function that returns said options, taking the current state as a parameter.
   
   _See also:_ [fetch parameters](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) on MDN
 

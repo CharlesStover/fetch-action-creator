@@ -33,7 +33,7 @@ export interface FetchActionCreator {
 
 type FetchStateAction = AbortAction | RejectAction | RequestAction | ResolveAction;
 
-type Init = RequestInit | (() => RequestInit);
+type Init = RequestInit | ((state?: Object) => RequestInit);
 
 export interface RejectAction {
   error: string;
@@ -155,7 +155,9 @@ const fetchActionCreator: FetchActionCreator = (
     // Fetch
     const requestInit: null | RequestInit =
       typeof init === 'function' ?
-        init() :
+        init.length ?
+          init(getState()) :
+          init() :
         init;
     return fetch(url, { signal, ...requestInit })
       .then(parseResponse)
