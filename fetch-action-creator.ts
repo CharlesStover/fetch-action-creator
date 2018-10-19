@@ -36,7 +36,7 @@ type FetchStateAction = AbortAction | RejectAction | RequestAction | ResolveActi
 type Init = RequestInit | ((state?: Object) => RequestInit);
 
 export interface RejectAction {
-  error: string;
+  error: Object | string;
   headers: Headers | null,
   statusCode: null | number;
   type: string;
