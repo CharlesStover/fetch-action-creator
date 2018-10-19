@@ -58,15 +58,18 @@ export interface ResolveAction {
 
 class FetchError extends Error {
   headers: Headers;
+  originalMessage: Object | string;
   statusCode: number;
 
   constructor(message: Object | string, headers: Headers, statusCode: number) {
-    super(
-      typeof message === 'string' ?
-        message :
-        JSON.stringify(message)
-    );
+    if (typeof message === 'string') {
+      super(message);
+    }
+    else {
+      super(JSON.stringify(message));
+    }
     this.headers = headers;
+    this.originalMessage = message;
     this.statusCode = statusCode;
   }
 }
@@ -191,9 +194,11 @@ const fetchActionCreator: FetchActionCreator = (
       .catch((err: Error | FetchError) => {
         const rejectAction: RejectAction = {
           error:
-            Object.prototype.hasOwnProperty.call(err, 'message') ?
-              err.message :
-              'Script error',
+            err instanceof FetchError ?
+              err.originalMessage :
+              Object.prototype.hasOwnProperty.call(err, 'message') ?
+                err.message :
+                'Script error',
           headers:
             err instanceof FetchError ?
               err.headers :
