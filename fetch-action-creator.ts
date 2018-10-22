@@ -188,8 +188,14 @@ const fetchActionCreator: FetchActionCreator = (
       .catch((err: Error | FetchError) => {
         const rejectAction: RejectAction = {
           error: err.message || 'Script error',
-          headers: err.headers || null,
-          statusCode: err.statusCode || null,
+          headers:
+            err instanceof FetchError ?
+              err.headers :
+              null,
+          statusCode:
+            err instanceof FetchError ?
+              err.statusCode :
+              null,
           type: 'REJECT_' + id
         };
         dispatch(createAction(
