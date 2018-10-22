@@ -15,7 +15,7 @@ export interface Actions {
 }
 
 interface Conditional {
-  (state: Object): boolean;
+  (state?: Object): boolean;
 }
 
 type FetchAction = ThunkAction<Promise<void>, any, void, AnyAction>;
