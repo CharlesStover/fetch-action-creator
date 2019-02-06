@@ -4,7 +4,7 @@ Fetches using standardized, four-part asynchronous actions for redux-thunk.
 
 Dispatch a single, asynchronous action that fetches a request, and your redux store will receive corresponding actions when your fetch API (1) requests, (2) resolves a response, (3) rejects an error, and/or (4) is aborted.
 
-[![version](https://img.shields.io/npm/v/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator/)
+[![version](https://img.shields.io/npm/v/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
 [![minified size](https://img.shields.io/bundlephobia/min/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
 [![minzipped size](https://img.shields.io/bundlephobia/minzip/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
 [![downloads](https://img.shields.io/npm/dt/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
