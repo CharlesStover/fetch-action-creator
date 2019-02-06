@@ -1,21 +1,24 @@
-# fetch-action-creator
+# Fetch Action Creator [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Automate%20the%20process%20of%20writing%20Redux%20actions%20for%20Fetch%20API%20requests!%20Reduce%20boilerplate%20and%20errors%20with%20fetch-action-creator.&url=https://github.com/CharlesStover/fetch-action-creator&via=CharlesStover&hashtags=react,reactjs,javascript,redux,typescript,webdev,webdeveloper,webdevelopment)
+
 Fetches using standardized, four-part asynchronous actions for redux-thunk.
 
 Dispatch a single, asynchronous action that fetches a request, and your redux store will receive corresponding actions when your fetch API (1) requests, (2) resolves a response, (3) rejects an error, and/or (4) is aborted.
 
-[![package](https://img.shields.io/github/package-json/v/CharlesStover/fetch-action-creator.svg)](https://github.com/CharlesStover/fetch-action-creator/)
-[![build](https://travis-ci.com/CharlesStover/fetch-action-creator.svg)](https://travis-ci.com/CharlesStover/fetch-action-creator/)
-[![downloads](https://img.shields.io/npm/dt/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
+[![version](https://img.shields.io/npm/v/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator/)
 [![minified size](https://img.shields.io/bundlephobia/min/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
 [![minzipped size](https://img.shields.io/bundlephobia/minzip/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
+[![downloads](https://img.shields.io/npm/dt/fetch-action-creator.svg)](https://www.npmjs.com/package/fetch-action-creator)
+[![build](https://travis-ci.com/CharlesStover/fetch-action-creator.svg)](https://travis-ci.com/CharlesStover/fetch-action-creator/)
 
 ## Install
+
 * `npm install fetch-action-creator --save` or
 * `yarn add fetch-action-creator`
 
 Your redux store must be using the `redux-thunk` middleware.
 
 ## Basic Example
+
 ```JS
 import fetchActionCreator from 'fetch-action-creator';
 
@@ -115,95 +118,96 @@ const fetchAddEmployee = name =>
 
 ## Parameters
 
-* ### id: string
+### id: string
 
-  An ID used to generate the types for each dispatched action.
+An ID used to generate the types for each dispatched action.
 
-  _Example:_ An ID of `ADD_EMPLOYEE` will dispatch the actions `REQUEST_ADD_EMPLOYEE`, `RESOLVE_ADD_EMPLOYEE`, `REJECT_ADD_EMPLOYEE`, and `ABORT_ADD_EMPLOYEE`.
+_Example:_ An ID of `ADD_EMPLOYEE` will dispatch the actions `REQUEST_ADD_EMPLOYEE`, `RESOLVE_ADD_EMPLOYEE`, `REJECT_ADD_EMPLOYEE`, and `ABORT_ADD_EMPLOYEE`.
 
-* ### url: string
+### url: string
 
-  The URL to which you are dispatching a fetch request.
+The URL to which you are dispatching a fetch request.
   
-  _See also:_ [fetch parameters](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) on MDN
+_See also:_ [fetch parameters](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) on MDN
 
-* ### init: null | RequestInit | (state?: Object) => RequestInit
+### init: null | RequestInit | (state?: Object) => RequestInit
 
-  The fetch options which you are including in your fetch request _or_ a function that returns said options, taking the current state as a parameter.
+The fetch options which you are including in your fetch request _or_ a function that returns said options, taking the current state as a parameter.
   
-  _See also:_ [fetch parameters](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) on MDN
+_See also:_ [fetch parameters](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters) on MDN
 
-  _Default:_ Empty object.
+_Default:_ Empty object.
 
-* ### actions: Actions | null
+### actions: Actions | null
 
-  An object of action mutators that will change the default actions that are dispatched to the redux reducers.
+An object of action mutators that will change the default actions that are dispatched to the redux reducers.
 
-  The keys of this object may be:
-  * `onAbort`, which is used when your fetch request is aborted
-  * `onReject`, which is used when your fetch request encountered an error
-  * `onRequest`, which is used when your fetch request has been initiated
-  * `onResolve`, which is used whe nyour fetch request has resolved successfully
+The keys of this object may be:
 
-  The values of this object may be an object, which will be _merged_ with the default action.
+* `onAbort`, which is used when your fetch request is aborted
+* `onReject`, which is used when your fetch request encountered an error
+* `onRequest`, which is used when your fetch request has been initiated
+* `onResolve`, which is used whe nyour fetch request has resolved successfully
 
-  ```JS
-  {
-    onAbort: { myKey: 'myValue' }
-  }
-  // creates
-  {
-    myKey: 'myValue',
-    type: 'ABORT_ID'
-  }
-  ```
+The values of this object may be an object, which will be _merged_ with the default action.
 
-  The values of this object may alternatively be a function, which will receive the default action and return a changed action.
+```JS
+{
+  onAbort: { myKey: 'myValue' }
+}
+// creates
+{
+  myKey: 'myValue',
+  type: 'ABORT_ID'
+}
+```
 
-  ```JS
-  {
-    onAbort: abortAction => ({
-      type: abortAction.type.split('').reverse().join('')
-    })
-  }
-  // creates
-  {
-    type: 'DI_TROBA'
-  }
-  ```
+The values of this object may alternatively be a function, which will receive the default action and return a changed action.
 
-  #### Action properties
+```JS
+{
+  onAbort: abortAction => ({
+    type: abortAction.type.split('').reverse().join('')
+  })
+}
+// creates
+{
+  type: 'DI_TROBA'
+}
+```
 
-  * `onAbort`
+#### Action properties
 
-    * _no additional properties_
+* `onAbort`
 
-  * `onReject`
+  * _no additional properties_
 
-    * `error` contains a string with the error message. This may be either a JavaScript error or server response.
+* `onReject`
 
-    * `statusCode` contains an integer value of the response status code, e.g. `404`.
+  * `error` contains a string with the error message. This may be either a JavaScript error or server response.
 
-  * `onRequest`
+  * `statusCode` contains an integer value of the response status code, e.g. `404`.
+
+* `onRequest`
   
-    * `abortController` contains an [AbortController instance](https://developer.mozilla.org/en-US/docs/Web/API/AbortController).
+  * `abortController` contains an [AbortController instance](https://developer.mozilla.org/en-US/docs/Web/API/AbortController).
 
-      If you desire to abort any of your fetch requests, you should store this instance in your redux state.
+    If you desire to abort any of your fetch requests, you should store this instance in your redux state.
 
-      If the user's browser does not support aborting requests, the value will be `null`.
+    If the user's browser does not support aborting requests, the value will be `null`.
 
-  * `onResolve`
+* `onResolve`
 
-    * `body` contains the body of the response. This can be a JavaScript object or string.
+  * `body` contains the body of the response. This can be a JavaScript object or string.
 
-    * `headers` contains an instance of `Headers` with which the server responded to the request.
+  * `headers` contains an instance of `Headers` with which the server responded to the request.
 
-    * `statusCode` contains an integer value of the response status code, e.g. `200`.
+  * `statusCode` contains an integer value of the response status code, e.g. `200`.
 
-* ### conditional?: (state: Object) => boolean
+### conditional?: (state: Object) => boolean
 
-  If present, this function is called prior to the fetch request.
+If present, this function is called prior to the fetch request.
 
-  If it returns true, the fetch request will continue. If it returns false, the entire asynchronous action will be ignored.
+If it returns true, the fetch request will continue. If it returns false, the entire asynchronous action will be ignored.
 
-  The parameter of this function is a current snapshot of your redux state.
+The parameter of this function is a current snapshot of your redux state.
