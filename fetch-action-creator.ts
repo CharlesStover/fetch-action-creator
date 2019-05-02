@@ -88,10 +88,18 @@ const parseResponse = (response: Response): Promise<[ Object | string, Headers, 
   const includeMeta = <T = Object | string>(result: T): [ T, Headers, number ] => [ result, response.headers, response.status ];
   const response2 = response.clone();
   try {
-    return response2.json().then(includeMeta);
-  }
-  catch (e) {
-    return response.text().then(includeMeta);
+    return response2.json().then(includeMeta)
+        .catch(() => {
+            return response.text().then(includeMeta);
+        })
+        .catch(() => {
+            return includeMeta('');
+        });
+  } catch (e) {
+    return response.text().then(includeMeta)
+        .catch(() => {
+          return includeMeta('');
+        });
   }
 };
 
