@@ -13,11 +13,28 @@ Response.prototype.json = () => {
 };
 Response.prototype.text = () => Promise.resolve('response.text()');
 
+const ErrorResponse = function(status) {
+  this.status = status;
+};
+ErrorResponse.prototype.clone = function() {
+  return this;
+};
+ErrorResponse.prototype.json = () => new Promise((resolve, reject) => { 
+  throw new Error('json parse error'); 
+});
+ErrorResponse.prototype.text =() => Promise.resolve('response.text()');
+
 const fetchAsyncSuccess = () => new Promise(resolve => {
   setTimeout(resolve, 1000);
 });
 const fetchError = () => Promise.reject(new Error('fetch error'));
 const fetchError2 = () => Promise.resolve(new Response(404));
+const fetchError3 = () => Promise.resolve(new ErrorResponse(404));
+const fetchError4 = () => {
+  const res = new ErrorResponse(404);
+  res.text = () => Promise.reject('response.text() reject');
+  return Promise.resolve(res);
+};
 const fetchSuccess = () => Promise.resolve(new Response(200));
 const getEmptyState = () => Object.create(null);
 
@@ -86,10 +103,44 @@ describe('fetchActionCreator', () => {
     global.fetch = fetchError2;
     const action = fetchActionCreator(ID, URL, INIT);
     let dispatchCalls = 0;
-    const dispatch = ({ type }) => {
+    const dispatch = ({ type, statusCode }) => {
       dispatchCalls++;
       if (dispatchCalls === 2) {
         expect(type).to.equal('REJECT_' + ID);
+      }
+    };
+    return action(dispatch, getEmptyState).then(() => {
+      expect(dispatchCalls).to.equal(2);
+    });
+  });
+
+  // REJECT (json parse error)
+  it('should dispatch a server reject action even with json error', () => {
+    global.fetch = fetchError3;
+    const action = fetchActionCreator(ID, URL, INIT);
+    let dispatchCalls = 0;
+    const dispatch = ({ type, statusCode }) => {
+      dispatchCalls++;
+      if (dispatchCalls === 2) {
+        expect(type).to.equal('REJECT_' + ID);
+        expect(statusCode).to.equal(404)
+      }
+    };
+    return action(dispatch, getEmptyState).then(() => {
+      expect(dispatchCalls).to.equal(2);
+    });
+  });
+
+  // REJECT (total parse error)
+  it('should dispatch a server reject action even with parse errors', () => {
+    global.fetch = fetchError4;
+    const action = fetchActionCreator(ID, URL, INIT);
+    let dispatchCalls = 0;
+    const dispatch = ({ type, statusCode }) => {
+      dispatchCalls++;
+      if (dispatchCalls === 2) {
+        expect(type).to.equal('REJECT_' + ID);
+        expect(statusCode).to.equal(404)
       }
     };
     return action(dispatch, getEmptyState).then(() => {
