@@ -7,7 +7,7 @@
   },
   "description": "Fetches using standardized, four-part asynchronous actions for redux-thunk.",
   "devDependencies": {
-    "@types/node": "^10.5.2",
+    "@types/node": "^12.6.2",
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
     "abortcontroller-polyfill": "^1.1.9",
