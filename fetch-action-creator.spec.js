@@ -1,3 +1,8 @@
+const fetchAsyncSuccess = () => new Promise(resolve => {
+  setTimeout(resolve, 1000);
+});
+global.fetch = fetchAsyncSuccess;
+
 const expect = require('chai').expect;
 const fetchActionCreator = require('./fetch-action-creator');
 require('abortcontroller-polyfill/dist/polyfill-patch-fetch');
@@ -24,9 +29,6 @@ ErrorResponse.prototype.json = () => new Promise((resolve, reject) => {
 });
 ErrorResponse.prototype.text =() => Promise.resolve('response.text()');
 
-const fetchAsyncSuccess = () => new Promise(resolve => {
-  setTimeout(resolve, 1000);
-});
 const fetchError = () => Promise.reject(new Error('fetch error'));
 const fetchError2 = () => Promise.resolve(new Response(404));
 const fetchError3 = () => Promise.resolve(new ErrorResponse(404));
